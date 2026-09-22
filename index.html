@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oportunidades PE — Becas, pasantías y prácticas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== 1. TOKENS DE COLOR — cambia aquí y cambia todo el sitio ===== */
+:root{
+  --fondo:#f7f6f1; --superficie:#ffffff; --borde:#e2ddd0;
+  --texto:#1f2420; --texto-suave:#5f6b61;
+  --acento:#2f6b4f; --acento-suave:#e8f0e9;
+  --urgente:#a83a2c; --urgente-suave:#fbeae7;
+  --sombra:0 1px 2px rgba(31,36,32,.06), 0 8px 24px rgba(31,36,32,.05);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --fondo:#141715; --superficie:#1d211e; --borde:#2f352f;
+    --texto:#eef0ec; --texto-suave:#9aa69d;
+    --acento:#7fc49c; --acento-suave:#1f2f26;
+    --urgente:#e89a8d; --urgente-suave:#332220;
+    --sombra:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --fondo:#141715; --superficie:#1d211e; --borde:#2f352f;
+  --texto:#eef0ec; --texto-suave:#9aa69d;
+  --acento:#7fc49c; --acento-suave:#1f2f26;
+  --urgente:#e89a8d; --urgente-suave:#332220;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--fondo);color:var(--texto);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+
+/* ===== 2. ESTRUCTURA ===== */
+.envoltura{max-width:960px;margin:0 auto;padding:0 20px}
+header.portada{background:var(--acento-suave);border-bottom:1px solid var(--borde);padding:44px 0 36px}
+.marca{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--acento);display:grid;place-items:center;
+  color:#fff;font-weight:700;font-size:15px;font-family:Fraunces,serif;flex:none}
+.marca b{font-size:15px;letter-spacing:.02em}
+h1{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:clamp(28px,5.2vw,44px);
+  line-height:1.1;margin:0 0 10px;letter-spacing:-.02em}
+.bajada{margin:0;max-width:52ch;color:var(--texto-suave);font-size:clamp(15px,2.4vw,17px)}
+
+/* ===== 3. BUSCADOR Y FILTROS ===== */
+.controles{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;
+  background:var(--fondo);border-bottom:1px solid var(--borde);padding:14px 0}
+#buscador{width:100%;padding:12px 14px;font:inherit;color:var(--texto);
+  background:var(--superficie);border:1px solid var(--borde);border-radius:10px;outline:none}
+#buscador:focus{border-color:var(--acento);box-shadow:0 0 0 3px var(--acento-suave)}
+.filtros{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{font:inherit;font-size:14px;padding:7px 13px;cursor:pointer;background:var(--superficie);
+  color:var(--texto-suave);border:1px solid var(--borde);border-radius:999px;transition:.15s}
+.chip:hover{color:var(--texto)}
+.chip[aria-pressed="true"]{background:var(--acento);border-color:var(--acento);color:var(--fondo)}
+.conteo{margin:22px 0 14px;font-size:14px;color:var(--texto-suave)}
+
+/* ===== 4. TARJETAS ===== */
+.lista{display:grid;gap:14px}
+.tarjeta{background:var(--superficie);border:1px solid var(--borde);border-radius:14px;
+  padding:18px;box-shadow:var(--sombra);display:flex;flex-direction:column;gap:10px}
+.fila-sup{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.etiquetas{display:flex;gap:6px;flex-wrap:wrap}
+.etiqueta{font-size:12px;font-weight:500;padding:3px 9px;border-radius:6px;
+  background:var(--acento-suave);color:var(--acento)}
+.plazo{font-size:13px;font-weight:600;color:var(--texto-suave);white-space:nowrap}
+.plazo.pronto{color:var(--urgente);background:var(--urgente-suave);padding:3px 9px;border-radius:6px}
+.tarjeta h2{margin:0;font-size:19px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.entidad{margin:0;font-size:14px;color:var(--texto-suave)}
+.resumen{margin:0;font-size:15px;color:var(--texto-suave)}
+.pie{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.enlace{font-size:14px;font-weight:600;color:var(--acento);text-decoration:none;
+  border-bottom:1.5px solid transparent;transition:.15s}
+.enlace:hover{border-bottom-color:var(--acento)}
+.fecha{font-size:13px;color:var(--texto-suave)}
+.vacio{text-align:center;padding:60px 20px;color:var(--texto-suave)}
+
+/* ===== 5. FUENTES PERMANENTES ===== */
+.seccion-fuentes{margin-top:52px;padding-top:34px;border-top:1px solid var(--borde)}
+.seccion-fuentes h2{font-family:Fraunces,Georgia,serif;font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
+.seccion-fuentes .intro{margin:0 0 20px;color:var(--texto-suave);max-width:58ch;font-size:15px}
+.fuentes{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));padding-bottom:50px}
+.fuente{background:var(--superficie);border:1px solid var(--borde);border-radius:12px;
+  padding:14px 16px;text-decoration:none;color:inherit;display:block;transition:.15s}
+.fuente:hover{border-color:var(--acento)}
+.fuente b{display:block;font-size:15px;font-weight:600;margin-bottom:3px;color:var(--acento)}
+.fuente span{font-size:13.5px;color:var(--texto-suave)}
+
+footer{border-top:1px solid var(--borde);padding:26px 0 40px;font-size:14px;color:var(--texto-suave)}
+@media (max-width:520px){header.portada{padding:32px 0 26px}}
+</style>
+</head>
+<body>
+
+<header class="portada">
+  <div class="envoltura">
+    <div class="marca"><div class="logo">O</div><b>Oportunidades PE</b></div>
+    <h1>Becas, pasantías y prácticas para estudiantes del Perú</h1>
+    <p class="bajada">Convocatorias reunidas en un solo lugar, con la fecha de cierre siempre visible. Porque la mayoría de oportunidades no se pierden por falta de méritos, sino porque nadie se enteró a tiempo.</p>
+  </div>
+</header>
+
+<div class="controles">
+  <div class="envoltura">
+    <input id="buscador" type="search" placeholder="Buscar por nombre, institución o palabra clave…" autocomplete="off">
+    <div class="filtros" id="filtros"></div>
+  </div>
+</div>
+
+<main class="envoltura">
+  <p class="conteo" id="conteo"></p>
+  <div class="lista" id="lista"></div>
+
+  <section class="seccion-fuentes">
+    <h2>Dónde buscar siempre</h2>
+    <p class="intro">Estas páginas publican convocatorias nuevas todo el año. Revisarlas cada lunes es el hábito que mantiene viva esta lista.</p>
+    <div class="fuentes" id="fuentes"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="envoltura">
+    Última revisión de las convocatorias: <b id="actualizado"></b>.<br>
+    Proyecto estudiantil sin fines de lucro. Verifica siempre las bases en la página oficial de cada institución antes de postular.
+  </div>
+</footer>
+
+<script>
+/* =============================================================
+   ★★★  AQUÍ VIVEN LAS CONVOCATORIAS  ★★★
+   Para agregar una: copia un bloque { ... } completo, pégalo
+   debajo y cambia los textos. Respeta comillas y comas.
+
+   cierre → "AAAA-MM-DD". Si todavía no conoces la fecha exacta,
+            déjalo como "" y la tarjeta dirá "Consultar bases".
+   ============================================================= */
+
+const ACTUALIZADO = "2026-09-20";   // cambia esta fecha cada vez que revisen la lista
+
+const CONVOCATORIAS = [
+  {
+    titulo: "Beca Generación del Bicentenario 2026 — convocatoria extraordinaria",
+    entidad: "Pronabec (Minedu)",
+    tipo: "Beca",
+    area: "Todas",
+    cierre: "2026-11-13",
+    resumen: "20 becas integrales para maestría (17) y doctorado (3) en el extranjero. Exige carta de aceptación de una universidad ubicada entre las 400 primeras de los rankings QS, ARWU o THE. Postulación virtual por SIBEC desde el 30 de octubre.",
+    enlace: "https://www.pronabec.gob.pe/"
+  },
+  {
+    titulo: "Proyectos de Investigación Básica 2027-01",
+    entidad: "Prociencia — Concytec",
+    tipo: "Concurso",
+    area: "Investigación",
+    cierre: "",
+    resumen: "Financia investigación básica en las áreas priorizadas por Concytec. Se postula a través de un grupo de investigación de la universidad: si tu facultad tiene uno, es la vía de entrada para estudiantes de pregrado.",
+    enlace: "https://prociencia.gob.pe/2026/08/proyectos-de-investigacion-basica-2027-01/"
+  },
+  {
+    titulo: "Cursos CABBIO Perú — Segunda Edición",
+    entidad: "Prociencia — Concytec",
+    tipo: "Curso",
+    area: "Biotecnología",
+    cierre: "",
+    resumen: "Financia cursos teórico-prácticos de biotecnología con cooperación internacional. Relevante para quien quiera formarse en biotecnología vegetal o agrícola.",
+    enlace: "https://prociencia.gob.pe/2026/07/cursos-cabbio-peru-segunda-edicion/"
+  },
+  {
+    titulo: "Emprendimiento Académico Fase 2",
+    entidad: "Prociencia — Proyecto SINACTI II",
+    tipo: "Concurso",
+    area: "Innovación",
+    cierre: "",
+    resumen: "Apoya llevar al mercado tecnologías desarrolladas en universidades peruanas, IPI o CITE que ya alcanzaron nivel de madurez TRL 7 u 8.",
+    enlace: "https://prociencia.gob.pe/2026/07/emprendimiento-academico-fase-2/"
+  },
+  {
+    titulo: "Prácticas preprofesionales y plazas CAS en el INIA",
+    entidad: "Instituto Nacional de Innovación Agraria",
+    tipo: "Práctica",
+    area: "Agrarias",
+    cierre: "",
+    resumen: "El INIA publica plazas de forma continua en sus estaciones experimentales agrarias de todo el país. Aparecen como 'Próximamente' y luego se abren: conviene revisar el portal cada semana.",
+    enlace: "https://app.inia.gob.pe/convocatorias/"
+  },
+  {
+    titulo: "Prácticas preprofesionales para Agronomía a nivel nacional",
+    entidad: "Entidades públicas y empresas privadas",
+    tipo: "Práctica",
+    area: "Agrarias",
+    cierre: "",
+    resumen: "Listado que agrupa las convocatorias vigentes de practicantes de Agronomía e Ingeniería Agronómica en todo el Perú, con la subvención y la sede de cada una.",
+    enlace: "https://www.practicas.pe/pre-profesional-de-AGRONOMIA-37.html"
+  }
+];
+
+/* ===== FUENTES PERMANENTES (no caducan, revísalas seguido) ===== */
+const FUENTES = [
+  { nombre:"Pronabec", detalle:"Beca 18, Beca Permanencia, becas de posgrado en el extranjero.", url:"https://www.pronabec.gob.pe/" },
+  { nombre:"Prociencia — convocatorias abiertas", detalle:"Tesis, investigación, pasantías científicas y eventos de CTI.", url:"https://prociencia.gob.pe/category/convocatorias/abiertas/" },
+  { nombre:"Calendario de concursos Prociencia", detalle:"Qué convocatoria abre en qué mes del año.", url:"https://calendario.prociencia.gob.pe/" },
+  { nombre:"Convocatorias INIA", detalle:"Prácticas y plazas en estaciones experimentales agrarias.", url:"https://app.inia.gob.pe/convocatorias/" },
+  { nombre:"Prácticas para Agronomía", detalle:"Vacantes vigentes de practicante en todo el país.", url:"https://www.practicas.pe/pre-profesional-de-AGRONOMIA-37.html" },
+  { nombre:"Plataforma del Estado Peruano", detalle:"Convocatorias de cualquier ministerio u organismo público.", url:"https://www.gob.pe/" }
+];
+
+/* ============ De aquí para abajo es la maquinaria ============ */
+
+const HOY = new Date(); HOY.setHours(0,0,0,0);
+const TIPOS = ["Todos", ...new Set(CONVOCATORIAS.map(c => c.tipo))];
+let filtroActivo = "Todos";
+let textoBusqueda = "";
+
+const diasRestantes = f => Math.ceil((new Date(f + "T00:00:00") - HOY) / 86400000);
+const fechaLarga = f => new Date(f + "T00:00:00")
+  .toLocaleDateString("es-PE", { day:"numeric", month:"long", year:"numeric" });
+
+function textoPlazo(c){
+  if (!c.cierre) return { txt:"Fecha por confirmar", urgente:false };
+  const d = diasRestantes(c.cierre);
+  if (d < 0)   return { txt:"Cerrada", urgente:false };
+  if (d === 0) return { txt:"Cierra hoy", urgente:true };
+  if (d === 1) return { txt:"Cierra mañana", urgente:true };
+  return { txt:`Quedan ${d} días`, urgente:d <= 14 };
+}
+
+// orden: primero las que cierran pronto, luego las sin fecha, al final las cerradas
+function prioridad(c){
+  if (!c.cierre) return 9000;
+  const d = diasRestantes(c.cierre);
+  return d < 0 ? 99999 : d;
+}
+
+function pintarFiltros(){
+  document.getElementById("filtros").innerHTML = TIPOS.map(t =>
+    `<button class="chip" data-tipo="${t}" aria-pressed="${t===filtroActivo}">${t}</button>`).join("");
+}
+
+function pintarLista(){
+  const q = textoBusqueda.trim().toLowerCase();
+  const visibles = CONVOCATORIAS
+    .filter(c => filtroActivo === "Todos" || c.tipo === filtroActivo)
+    .filter(c => !q || [c.titulo,c.entidad,c.resumen,c.area].join(" ").toLowerCase().includes(q))
+    .sort((a,b) => prioridad(a) - prioridad(b));
+
+  document.getElementById("conteo").textContent = visibles.length === 0 ? "" :
+    `${visibles.length} ${visibles.length === 1 ? "convocatoria" : "convocatorias"}`;
+
+  document.getElementById("lista").innerHTML = visibles.length === 0
+    ? `<p class="vacio">No encontramos convocatorias con ese criterio.<br>Prueba con otra palabra o quita los filtros.</p>`
+    : visibles.map(c => {
+        const p = textoPlazo(c);
+        return `
+        <article class="tarjeta">
+          <div class="fila-sup">
+            <div class="etiquetas">
+              <span class="etiqueta">${c.tipo}</span>
+              <span class="etiqueta">${c.area}</span>
+            </div>
+            <span class="plazo ${p.urgente ? "pronto" : ""}">${p.txt}</span>
+          </div>
+          <h2>${c.titulo}</h2>
+          <p class="entidad">${c.entidad}</p>
+          <p class="resumen">${c.resumen}</p>
+          <div class="pie">
+            <span class="fecha">${c.cierre ? "Cierre: " + fechaLarga(c.cierre) : "Consultar bases para el cronograma"}</span>
+            <a class="enlace" href="${c.enlace}" target="_blank" rel="noopener">Ver convocatoria →</a>
+          </div>
+        </article>`;
+      }).join("");
+}
+
+function pintarFuentes(){
+  document.getElementById("fuentes").innerHTML = FUENTES.map(f =>
+    `<a class="fuente" href="${f.url}" target="_blank" rel="noopener">
+       <b>${f.nombre}</b><span>${f.detalle}</span>
+     </a>`).join("");
+}
+
+document.getElementById("filtros").addEventListener("click", e => {
+  const b = e.target.closest(".chip");
+  if (!b) return;
+  filtroActivo = b.dataset.tipo;
+  pintarFiltros(); pintarLista();
+});
+document.getElementById("buscador").addEventListener("input", e => {
+  textoBusqueda = e.target.value; pintarLista();
+});
+
+document.getElementById("actualizado").textContent = fechaLarga(ACTUALIZADO);
+pintarFiltros(); pintarLista(); pintarFuentes();
+</script>
+</body>
+</html>
