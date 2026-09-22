@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
-/* ===== 1. TOKENS DE COLOR — cambia aquí y cambia todo el sitio ===== */
 :root{
   --fondo:#f7f6f1; --superficie:#ffffff; --borde:#e2ddd0;
   --texto:#1f2420; --texto-suave:#5f6b61;
@@ -39,8 +39,6 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--fondo);color:var(--texto);
   font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
   font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
-
-/* ===== 2. ESTRUCTURA ===== */
 .envoltura{max-width:960px;margin:0 auto;padding:0 20px}
 header.portada{background:var(--acento-suave);border-bottom:1px solid var(--borde);padding:44px 0 36px}
 .marca{display:flex;align-items:center;gap:10px;margin-bottom:18px}
@@ -50,8 +48,6 @@ header.portada{background:var(--acento-suave);border-bottom:1px solid var(--bord
 h1{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:clamp(28px,5.2vw,44px);
   line-height:1.1;margin:0 0 10px;letter-spacing:-.02em}
 .bajada{margin:0;max-width:52ch;color:var(--texto-suave);font-size:clamp(15px,2.4vw,17px)}
-
-/* ===== 3. BUSCADOR Y FILTROS ===== */
 .controles{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;
   background:var(--fondo);border-bottom:1px solid var(--borde);padding:14px 0}
 #buscador{width:100%;padding:12px 14px;font:inherit;color:var(--texto);
@@ -63,8 +59,8 @@ h1{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:clamp(28px,5.2vw
 .chip:hover{color:var(--texto)}
 .chip[aria-pressed="true"]{background:var(--acento);border-color:var(--acento);color:var(--fondo)}
 .conteo{margin:22px 0 14px;font-size:14px;color:var(--texto-suave)}
-
-/* ===== 4. TARJETAS ===== */
+.aviso{margin:22px 0 0;padding:12px 14px;border-radius:10px;background:var(--urgente-suave);
+  color:var(--urgente);font-size:14px;display:none}
 .lista{display:grid;gap:14px}
 .tarjeta{background:var(--superficie);border:1px solid var(--borde);border-radius:14px;
   padding:18px;box-shadow:var(--sombra);display:flex;flex-direction:column;gap:10px}
@@ -83,8 +79,7 @@ h1{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:clamp(28px,5.2vw
 .enlace:hover{border-bottom-color:var(--acento)}
 .fecha{font-size:13px;color:var(--texto-suave)}
 .vacio{text-align:center;padding:60px 20px;color:var(--texto-suave)}
-
-/* ===== 5. FUENTES PERMANENTES ===== */
+.cargando{text-align:center;padding:60px 20px;color:var(--texto-suave)}
 .seccion-fuentes{margin-top:52px;padding-top:34px;border-top:1px solid var(--borde)}
 .seccion-fuentes h2{font-family:Fraunces,Georgia,serif;font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
 .seccion-fuentes .intro{margin:0 0 20px;color:var(--texto-suave);max-width:58ch;font-size:15px}
@@ -94,7 +89,6 @@ h1{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:clamp(28px,5.2vw
 .fuente:hover{border-color:var(--acento)}
 .fuente b{display:block;font-size:15px;font-weight:600;margin-bottom:3px;color:var(--acento)}
 .fuente span{font-size:13.5px;color:var(--texto-suave)}
-
 footer{border-top:1px solid var(--borde);padding:26px 0 40px;font-size:14px;color:var(--texto-suave)}
 @media (max-width:520px){header.portada{padding:32px 0 26px}}
 </style>
@@ -118,7 +112,8 @@ footer{border-top:1px solid var(--borde);padding:26px 0 40px;font-size:14px;colo
 
 <main class="envoltura">
   <p class="conteo" id="conteo"></p>
-  <div class="lista" id="lista"></div>
+  <p class="aviso" id="aviso"></p>
+  <div class="lista" id="lista"><p class="cargando">Cargando convocatorias…</p></div>
 
   <section class="seccion-fuentes">
     <h2>Dónde buscar siempre</h2>
@@ -129,81 +124,46 @@ footer{border-top:1px solid var(--borde);padding:26px 0 40px;font-size:14px;colo
 
 <footer>
   <div class="envoltura">
-    Última revisión de las convocatorias: <b id="actualizado"></b>.<br>
+    Las convocatorias se cargan en vivo desde una hoja compartida por el equipo.<br>
     Proyecto estudiantil sin fines de lucro. Verifica siempre las bases en la página oficial de cada institución antes de postular.
   </div>
 </footer>
 
 <script>
 /* =============================================================
-   ★★★  AQUÍ VIVEN LAS CONVOCATORIAS  ★★★
-   Para agregar una: copia un bloque { ... } completo, pégalo
-   debajo y cambia los textos. Respeta comillas y comas.
+   ★★★  CONFIGURACIÓN — lo único que se toca a mano  ★★★
 
-   cierre → "AAAA-MM-DD". Si todavía no conoces la fecha exacta,
-            déjalo como "" y la tarjeta dirá "Consultar bases".
+   Pega aquí el enlace CSV que te dio Google al publicar la hoja
+   (Archivo → Compartir → Publicar en la Web → CSV).
+   Mientras esté vacío, la página usa los datos de ejemplo de abajo.
+
+   La hoja debe tener estas columnas exactas en la primera fila:
+   Titulo, Entidad, Tipo, Area, Cierre, Resumen, Enlace
+   (Cierre en formato AAAA-MM-DD, o vacío si aún no se sabe)
    ============================================================= */
+const HOJA_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSgVf4FXhxyRmy_Igx5KDXG3iE-3aiISvLj4R1pLQJnYkbbHWgXWvCW1kTinBnZR_ldnt0z4SSqXCTT/pub?gid=0&single=true&output=csv";
 
-const ACTUALIZADO = "2026-09-20";   // cambia esta fecha cada vez que revisen la lista
-
-const CONVOCATORIAS = [
+const EJEMPLOS_DE_RESPALDO = [
   {
-    titulo: "Beca Generación del Bicentenario 2026 — convocatoria extraordinaria",
-    entidad: "Pronabec (Minedu)",
-    tipo: "Beca",
-    area: "Todas",
-    cierre: "2026-11-13",
-    resumen: "20 becas integrales para maestría (17) y doctorado (3) en el extranjero. Exige carta de aceptación de una universidad ubicada entre las 400 primeras de los rankings QS, ARWU o THE. Postulación virtual por SIBEC desde el 30 de octubre.",
-    enlace: "https://www.pronabec.gob.pe/"
+    Titulo: "Beca Generación del Bicentenario 2026 — convocatoria extraordinaria",
+    Entidad: "Pronabec (Minedu)",
+    Tipo: "Beca",
+    Area: "Todas",
+    Cierre: "2026-11-13",
+    Resumen: "20 becas integrales para maestría y doctorado en el extranjero, en universidades top 400 de rankings QS, ARWU o THE.",
+    Enlace: "https://www.pronabec.gob.pe/"
   },
   {
-    titulo: "Proyectos de Investigación Básica 2027-01",
-    entidad: "Prociencia — Concytec",
-    tipo: "Concurso",
-    area: "Investigación",
-    cierre: "",
-    resumen: "Financia investigación básica en las áreas priorizadas por Concytec. Se postula a través de un grupo de investigación de la universidad: si tu facultad tiene uno, es la vía de entrada para estudiantes de pregrado.",
-    enlace: "https://prociencia.gob.pe/2026/08/proyectos-de-investigacion-basica-2027-01/"
-  },
-  {
-    titulo: "Cursos CABBIO Perú — Segunda Edición",
-    entidad: "Prociencia — Concytec",
-    tipo: "Curso",
-    area: "Biotecnología",
-    cierre: "",
-    resumen: "Financia cursos teórico-prácticos de biotecnología con cooperación internacional. Relevante para quien quiera formarse en biotecnología vegetal o agrícola.",
-    enlace: "https://prociencia.gob.pe/2026/07/cursos-cabbio-peru-segunda-edicion/"
-  },
-  {
-    titulo: "Emprendimiento Académico Fase 2",
-    entidad: "Prociencia — Proyecto SINACTI II",
-    tipo: "Concurso",
-    area: "Innovación",
-    cierre: "",
-    resumen: "Apoya llevar al mercado tecnologías desarrolladas en universidades peruanas, IPI o CITE que ya alcanzaron nivel de madurez TRL 7 u 8.",
-    enlace: "https://prociencia.gob.pe/2026/07/emprendimiento-academico-fase-2/"
-  },
-  {
-    titulo: "Prácticas preprofesionales y plazas CAS en el INIA",
-    entidad: "Instituto Nacional de Innovación Agraria",
-    tipo: "Práctica",
-    area: "Agrarias",
-    cierre: "",
-    resumen: "El INIA publica plazas de forma continua en sus estaciones experimentales agrarias de todo el país. Aparecen como 'Próximamente' y luego se abren: conviene revisar el portal cada semana.",
-    enlace: "https://app.inia.gob.pe/convocatorias/"
-  },
-  {
-    titulo: "Prácticas preprofesionales para Agronomía a nivel nacional",
-    entidad: "Entidades públicas y empresas privadas",
-    tipo: "Práctica",
-    area: "Agrarias",
-    cierre: "",
-    resumen: "Listado que agrupa las convocatorias vigentes de practicantes de Agronomía e Ingeniería Agronómica en todo el Perú, con la subvención y la sede de cada una.",
-    enlace: "https://www.practicas.pe/pre-profesional-de-AGRONOMIA-37.html"
+    Titulo: "Prácticas preprofesionales para Agronomía a nivel nacional",
+    Entidad: "Entidades públicas y privadas",
+    Tipo: "Práctica",
+    Area: "Agrarias",
+    Cierre: "",
+    Resumen: "Listado de convocatorias vigentes de practicantes de Agronomía en todo el Perú.",
+    Enlace: "https://www.practicas.pe/pre-profesional-de-AGRONOMIA-37.html"
   }
 ];
 
-/* ===== FUENTES PERMANENTES (no caducan, revísalas seguido) ===== */
 const FUENTES = [
   { nombre:"Pronabec", detalle:"Beca 18, Beca Permanencia, becas de posgrado en el extranjero.", url:"https://www.pronabec.gob.pe/" },
   { nombre:"Prociencia — convocatorias abiertas", detalle:"Tesis, investigación, pasantías científicas y eventos de CTI.", url:"https://prociencia.gob.pe/category/convocatorias/abiertas/" },
@@ -215,14 +175,28 @@ const FUENTES = [
 
 /* ============ De aquí para abajo es la maquinaria ============ */
 
+let CONVOCATORIAS = [];
 const HOY = new Date(); HOY.setHours(0,0,0,0);
-const TIPOS = ["Todos", ...new Set(CONVOCATORIAS.map(c => c.tipo))];
 let filtroActivo = "Todos";
 let textoBusqueda = "";
 
 const diasRestantes = f => Math.ceil((new Date(f + "T00:00:00") - HOY) / 86400000);
 const fechaLarga = f => new Date(f + "T00:00:00")
   .toLocaleDateString("es-PE", { day:"numeric", month:"long", year:"numeric" });
+
+function normalizar(filas){
+  return filas
+    .filter(r => r.Titulo && r.Titulo.trim())
+    .map(r => ({
+      titulo: (r.Titulo || "").trim(),
+      entidad: (r.Entidad || "").trim(),
+      tipo: (r.Tipo || "Otro").trim(),
+      area: (r.Area || "Todas").trim(),
+      cierre: (r.Cierre || "").trim(),
+      resumen: (r.Resumen || "").trim(),
+      enlace: (r.Enlace || "#").trim()
+    }));
+}
 
 function textoPlazo(c){
   if (!c.cierre) return { txt:"Fecha por confirmar", urgente:false };
@@ -232,8 +206,6 @@ function textoPlazo(c){
   if (d === 1) return { txt:"Cierra mañana", urgente:true };
   return { txt:`Quedan ${d} días`, urgente:d <= 14 };
 }
-
-// orden: primero las que cierran pronto, luego las sin fecha, al final las cerradas
 function prioridad(c){
   if (!c.cierre) return 9000;
   const d = diasRestantes(c.cierre);
@@ -241,7 +213,8 @@ function prioridad(c){
 }
 
 function pintarFiltros(){
-  document.getElementById("filtros").innerHTML = TIPOS.map(t =>
+  const tipos = ["Todos", ...new Set(CONVOCATORIAS.map(c => c.tipo))];
+  document.getElementById("filtros").innerHTML = tipos.map(t =>
     `<button class="chip" data-tipo="${t}" aria-pressed="${t===filtroActivo}">${t}</button>`).join("");
 }
 
@@ -286,6 +259,11 @@ function pintarFuentes(){
      </a>`).join("");
 }
 
+function mostrarAviso(msg){
+  const el = document.getElementById("aviso");
+  el.textContent = msg; el.style.display = "block";
+}
+
 document.getElementById("filtros").addEventListener("click", e => {
   const b = e.target.closest(".chip");
   if (!b) return;
@@ -296,8 +274,26 @@ document.getElementById("buscador").addEventListener("input", e => {
   textoBusqueda = e.target.value; pintarLista();
 });
 
-document.getElementById("actualizado").textContent = fechaLarga(ACTUALIZADO);
-pintarFiltros(); pintarLista(); pintarFuentes();
+function iniciarConDatos(filas, esRespaldo){
+  CONVOCATORIAS = normalizar(filas);
+  if (esRespaldo) mostrarAviso("Mostrando datos de ejemplo: falta conectar la hoja de Google en el código (HOJA_CSV_URL).");
+  pintarFiltros(); pintarLista(); pintarFuentes();
+}
+
+if (!HOJA_CSV_URL) {
+  iniciarConDatos(EJEMPLOS_DE_RESPALDO, true);
+} else {
+  Papa.parse(HOJA_CSV_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: (res) => iniciarConDatos(res.data, false),
+    error: () => {
+      mostrarAviso("No se pudo cargar la hoja en vivo. Mostrando datos de ejemplo mientras tanto.");
+      iniciarConDatos(EJEMPLOS_DE_RESPALDO, false);
+    }
+  });
+}
 </script>
 </body>
 </html>
